@@ -1,5 +1,6 @@
 """Yardımcı fonksiyonlar."""
 
+import time
 from collections.abc import Callable
 
 
@@ -30,3 +31,23 @@ def en_bagli_gezegenler(galaksi: dict) -> list[str]:
         galaksi["gezegenler"],
         key=lambda gezegen: (-len(baglantilar[gezegen]), gezegen),
     )
+
+
+def sure_olc(fonksiyon: Callable) -> Callable:
+    """Verilen fonksiyonun çalışma süresini yazan bir sarmalayıcı döndürür."""
+
+    def sarmalayici(*args, **kwargs):
+        baslangic = time.perf_counter()
+        sonuc = fonksiyon(*args, **kwargs)
+        sure = time.perf_counter() - baslangic
+        print(f"{fonksiyon.__name__} {sure:.6f} saniyede çalıştı")
+        return sonuc
+
+    return sarmalayici
+
+
+if __name__ == "__main__":
+    from uzay_oyunu.oyun import galaksi_yukle
+
+    en_bagli_gezegenler = sure_olc(en_bagli_gezegenler)
+    print(en_bagli_gezegenler(galaksi_yukle()))
