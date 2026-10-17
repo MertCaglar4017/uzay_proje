@@ -13,6 +13,16 @@ from uzay_oyunu.akis import (
     uzun_yolculuklar,
     yakit_gostergesi,
 )
+from uzay_oyunu.istatistik import (
+    buyuk_harfli_adlar_liste,
+    buyuk_harfli_adlar_map,
+    hizli_yolculuk,
+    iki_baglantili_filter,
+    iki_baglantili_liste,
+    toplam_baglanti_reduce,
+    toplam_baglanti_sum,
+    yolculuk,
+)
 from uzay_oyunu.oyun import galaksi_yukle
 
 SEYIR = Path(__file__).parent.parent / "veri" / "seyir.txt"
@@ -123,3 +133,29 @@ def test_onbellekli_ve_onbelleksiz_ayni_sonuc():
     onbellekli = rota_sayaci(baglantilar)
     onbelleksiz = rota_sayaci_onbelleksiz(baglantilar)
     assert onbellekli("dünya", 8) == onbelleksiz("dünya", 8)
+
+
+def test_buyuk_harfli_adlar_iki_yol_ayni():
+    g = galaksi_yukle()
+    beklenen = ["DÜNYA", "CENTAURI", "SIRIUS", "ORION", "KARA_DELIK"]
+    assert buyuk_harfli_adlar_map(g) == beklenen
+    assert buyuk_harfli_adlar_liste(g) == beklenen
+
+
+def test_iki_baglantili_gezegenler_iki_yol_ayni():
+    g = galaksi_yukle()
+    beklenen = ["dünya", "centauri", "sirius", "orion"]
+    assert iki_baglantili_filter(g) == beklenen
+    assert iki_baglantili_liste(g) == beklenen
+
+
+def test_toplam_baglanti_iki_yol_ayni():
+    g = galaksi_yukle()
+    assert toplam_baglanti_reduce(g) == 10
+    assert toplam_baglanti_sum(g) == 10
+
+
+def test_hizli_yolculuk_hiz_sabit():
+    assert yolculuk(30, hiz=2) == 15
+    assert hizli_yolculuk(30) == 10
+    assert hizli_yolculuk.keywords == {"hiz": 3}
