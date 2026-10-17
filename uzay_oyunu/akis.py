@@ -1,6 +1,8 @@
 """Üreteçler, veri akışları ve önbellekli hesaplar."""
 
-from collections.abc import Iterable, Iterator
+import time
+from collections.abc import Callable, Iterable, Iterator
+from functools import lru_cache
 from pathlib import Path
 
 
@@ -42,3 +44,50 @@ def uzun_yolculuklar(
     for kaynak, hedef, yakit in kayitlar:
         if yakit > esik:
             yield kaynak, hedef, yakit
+
+
+def rota_sayaci(baglantilar: dict[str, list[str]]) -> Callable[[str, int], int]:
+    """Önbellekli bir rota_sayisi(gezegen, adim) fonksiyonu döndürür."""
+
+    @lru_cache(maxsize=None)
+    def rota_sayisi(gezegen: str, adim: int) -> int:
+        """Gezegenden başlayıp tam adim yolculuk yapan farklı rotaların sayısı."""
+        if adim == 0:
+            return 1
+        return sum(rota_sayisi(hedef, adim - 1) for hedef in baglantilar[gezegen])
+
+    return rota_sayisi
+
+
+def rota_sayaci_onbelleksiz(
+    baglantilar: dict[str, list[str]],
+) -> Callable[[str, int], int]:
+    """rota_sayaci ile aynı hesabı önbellek olmadan yapan fonksiyon döndürür."""
+
+    def rota_sayisi(gezegen: str, adim: int) -> int:
+        """Gezegenden başlayıp tam adim yolculuk yapan farklı rotaların sayısı."""
+        if adim == 0:
+            return 1
+        return sum(rota_sayisi(hedef, adim - 1) for hedef in baglantilar[gezegen])
+
+    return rota_sayisi
+
+
+if __name__ == "__main__":
+    from uzay_oyunu.oyun import galaksi_yukle
+
+    baglantilar = galaksi_yukle()["baglantilar"]
+
+    onbelleksiz = rota_sayaci_onbelleksiz(baglantilar)
+    baslangic = time.perf_counter()
+    sonuc_1 = onbelleksiz("dünya", 20)
+    sure_1 = time.perf_counter() - baslangic
+
+    say = rota_sayaci(baglantilar)
+    baslangic = time.perf_counter()
+    sonuc_2 = say("dünya", 20)
+    sure_2 = time.perf_counter() - baslangic
+
+    print(f"Önbelleksiz: {sonuc_1} rota, {sure_1:.4f} saniye")
+    print(f"Önbellekli : {sonuc_2} rota, {sure_2:.6f} saniye")
+    print(say.cache_info())

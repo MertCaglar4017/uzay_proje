@@ -7,10 +7,13 @@ import pytest
 from uzay_oyunu.akis import (
     ayristir,
     fibonacci,
+    rota_sayaci,
+    rota_sayaci_onbelleksiz,
     satirlari_oku,
     uzun_yolculuklar,
     yakit_gostergesi,
 )
+from uzay_oyunu.oyun import galaksi_yukle
 
 SEYIR = Path(__file__).parent.parent / "veri" / "seyir.txt"
 
@@ -86,3 +89,37 @@ def test_boru_hatti_tembel():
     assert inspect.isgenerator(satirlar)
     assert inspect.isgenerator(kayitlar)
     assert inspect.isgenerator(uzunlar)
+
+
+def test_rota_sayisi_pdf_ornekleri():
+    say = rota_sayaci(galaksi_yukle()["baglantilar"])
+    assert say("dünya", 3) == 9
+    assert say("dünya", 10) == 2185
+    assert say("dünya", 40) == 16832258606399
+
+
+def test_rota_sayisi_sifir_adim():
+    say = rota_sayaci(galaksi_yukle()["baglantilar"])
+    assert say("dünya", 0) == 1
+
+
+def test_rota_sayisi_kucuk_harita():
+    baglantilar = {"a": ["b", "c"], "b": ["c"], "c": ["a"]}
+    say = rota_sayaci(baglantilar)
+    assert say("a", 2) == 2
+    assert say("a", 3) == 3
+
+
+def test_onbellek_isabet_sayisi_artar():
+    say = rota_sayaci(galaksi_yukle()["baglantilar"])
+    say("dünya", 10)
+    ilk = say.cache_info().hits
+    say("dünya", 10)
+    assert say.cache_info().hits > ilk
+
+
+def test_onbellekli_ve_onbelleksiz_ayni_sonuc():
+    baglantilar = galaksi_yukle()["baglantilar"]
+    onbellekli = rota_sayaci(baglantilar)
+    onbelleksiz = rota_sayaci_onbelleksiz(baglantilar)
+    assert onbellekli("dünya", 8) == onbelleksiz("dünya", 8)
