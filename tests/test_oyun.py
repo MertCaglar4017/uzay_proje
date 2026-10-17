@@ -12,3 +12,11 @@ def test_hamle_sayisi_yazilir(monkeypatch, capsys):
     monkeypatch.setattr("builtins.input", lambda _: next(cevaplar))
     travel()
     assert "Oyunu 2 hamlede bitirdin!" in capsys.readouterr().out
+
+
+def test_yakit_bitince_oyun_kaybedilir(monkeypatch, capsys):
+    cevaplar = iter(["1"] * 25)
+    monkeypatch.setattr("builtins.input", lambda _: next(cevaplar))
+    sonuc = travel()
+    assert sonuc != "kara_delik"
+    assert "Yakıtın bitti, uzayda sürükleniyorsun…" in capsys.readouterr().out

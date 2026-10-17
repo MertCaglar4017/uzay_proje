@@ -9,3 +9,10 @@ def fibonacci() -> Iterator[int]:
     while True:
         yield onceki
         onceki, simdiki = simdiki, onceki + simdiki
+
+
+def yakit_gostergesi(yakit: int, tuketim: int) -> Iterator[int]:
+    """Her adımda yakıtı tüketim kadar azaltıp kalanı üretir; 0'a inince durur."""
+    while yakit > 0:
+        yakit = max(yakit - tuketim, 0)
+        yield yakit

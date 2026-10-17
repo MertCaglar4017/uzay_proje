@@ -1,6 +1,8 @@
 from itertools import islice, takewhile
 
-from uzay_oyunu.akis import fibonacci
+import pytest
+
+from uzay_oyunu.akis import fibonacci, yakit_gostergesi
 
 
 def test_fibonacci_next_ile_ilk_uc_deger():
@@ -25,3 +27,15 @@ def test_fibonacci_uretec_tek_kullanimlik():
     assert ilk == [0, 1, 1, 2, 3]
     assert ikinci == [5, 8, 13, 21, 34]
     assert ilk != ikinci
+
+    
+
+def test_yakit_gostergesi_liste():
+    assert list(yakit_gostergesi(100, 30)) == [70, 40, 10, 0]
+
+
+def test_yakit_gostergesi_bitince_stopiteration():
+    g = yakit_gostergesi(10, 10)
+    assert next(g) == 0
+    with pytest.raises(StopIteration):
+        next(g)

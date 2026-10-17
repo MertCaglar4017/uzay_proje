@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 
+from uzay_oyunu.akis import yakit_gostergesi
 from uzay_oyunu.araclar import hamle_sayaci
 
 GALAKSI_YOLU = Path(__file__).with_name("galaksi.json")
@@ -59,9 +60,10 @@ def travel(credits=True, engines=False, copilot=True):
     galaksi = galaksi_yukle()
     planet = galaksi["konum"]
     fuel = galaksi["yakit"]
+    gosterge = yakit_gostergesi(fuel, 5)
     sayac = hamle_sayaci()
     hamle = 0
-    while planet != "kara_delik" and fuel > 0:
+    while planet != "kara_delik":
         print(f"Şu an {planet} gezegenindesin. Yakıt: {fuel}")
 
         envanter = envanter_metni(credits, engines, copilot)
@@ -73,14 +75,16 @@ def travel(credits=True, engines=False, copilot=True):
         print(hedef_menusu(destinations))
 
         choice = int(input("> "))
+        try:
+            fuel = next(gosterge)
+        except StopIteration:
+            print("Yakıtın bitti, uzayda sürükleniyorsun…")
+            break
         planet = destinations[choice - 1]
-        fuel -= 5
         hamle = sayac()
 
     if planet == "kara_delik":
         print("Kara deliğe ulaştın!")
-    else:
-        print("Yakıtın bitti.")
     print(f"Oyunu {hamle} hamlede bitirdin!")
     return planet
 
