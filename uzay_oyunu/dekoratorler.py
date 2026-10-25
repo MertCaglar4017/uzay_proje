@@ -19,6 +19,18 @@ def sure_olc(fonksiyon: Callable) -> Callable:
     return sarmalayici
 
 
+def say(fonksiyon: Callable) -> Callable:
+    """Fonksiyonun kaç kez çağrıldığını, fonksiyonun cagri niteliğinde sayar."""
+
+    @wraps(fonksiyon)
+    def sarmalayici(*args, **kwargs):
+        sarmalayici.cagri += 1
+        return fonksiyon(*args, **kwargs)
+
+    sarmalayici.cagri = 0
+    return sarmalayici
+
+
 if __name__ == "__main__":
     from uzay_oyunu.akis import rota_sayaci_onbelleksiz
     from uzay_oyunu.oyun import galaksi_yukle
