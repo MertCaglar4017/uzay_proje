@@ -1,0 +1,50 @@
+# Dekoratör Sırası Deneyi
+
+`fib(20)` için özyinelemeli fibonacci fonksiyonunun kaç kez çağrıldığı:
+
+| Tanım | Çağrı sayısı |
+|---|---|
+| Yalnızca `@say` | 21891 |
+| `@say` üstte, `@lru_cache` altta | 39 |
+| `@lru_cache` üstte, `@say` altta | 21 |
+
+## Genel kural
+
+Dekoratörler alttan yukarı doğru uygulanır: en alttaki dekoratör fonksiyonu
+önce sarar, üsttekiler onun üstüne sarılır. Fonksiyon çağrılınca ise çağrı en
+üstteki sarmalayıcıdan içeriye doğru iner. Yani dıştaki dekoratör **bütün**
+çağrıları görür, içteki dekoratör ise yalnızca dıştakinin içeri bıraktığı
+çağrıları görür.
+
+Özyinelemede fonksiyonun içindeki `fib(...)` çağrıları da fonksiyonun adını
+kullanır. Dekoratör uygulandıktan sonra bu ad en dıştaki sarmalayıcıyı gösterir,
+bu yüzden her özyinelemeli çağrı en dıştaki dekoratörden geçer.
+
+## 1. Yalnızca `@say`: 21891
+
+Önbellek yok. `fib(n)` her seferinde `fib(n-1)` ve `fib(n-2)` çağırır ve aynı
+alt problemler defalarca baştan hesaplanır. Çağrı sayısı `2 * F(21) - 1`
+formülüne uyar (`F(21) = 10946`), yani 21891. Sayı `n` büyüdükçe çok hızlı artar.
+
+## 2. `@say` üstte, `@lru_cache` altta: 39
+
+`say` en dışta olduğu için önbellek cevabı hazır bilse bile her çağrıyı sayar.
+Önbellek sayesinde her `fib(k)` değeri yalnızca bir kez hesaplanır. `fib(20)`
+için bir üst çağrı vardır, hesaplanan 19 farklı değer (2'den 20'ye kadar) ikişer
+özyinelemeli çağrı yapar: 1 + 19 × 2 = 39. Çağrıların çoğu önbellekten cevap
+alır ama `say` hepsini sayar.
+
+## 3. `@lru_cache` üstte, `@say` altta: 21
+
+Bu sefer önbellek en dışta. Önbellekte olan bir değer sorulduğunda cevap hemen
+verilir ve çağrı içerideki `say`'e hiç ulaşmaz. `say` yalnızca önbellekte
+bulunamayan (ilk kez sorulan) değerleri görür. `fib(0)`'dan `fib(20)`'ye kadar
+21 farklı değer olduğu için sayaç 21 olur.
+
+## Neden `fib.__wrapped__.cagri`?
+
+`functools.wraps` içteki fonksiyonun niteliklerini dıştaki sarmalayıcıya
+kopyalar, ama sayaç bir sayı olduğu için kopyalama anındaki değeri (0) taşınır
+ve sonradan güncellenmez. Dıştaki `lru_cache` katmanının `cagri` niteliği bu
+yüzden hep 0 kalır. Gerçek sayaç içteki `say` sarmalayıcısındadır ve
+`fib.__wrapped__` ile ona ulaşılır.

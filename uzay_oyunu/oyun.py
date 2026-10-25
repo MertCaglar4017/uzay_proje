@@ -6,6 +6,7 @@ from pathlib import Path
 from uzay_oyunu.akis import yakit_gostergesi
 from uzay_oyunu.araclar import hamle_sayaci
 from uzay_oyunu.dekoratorler import log_cagri
+from uzay_oyunu.komutlar import KOMUTLAR
 
 GALAKSI_YOLU = Path(__file__).with_name("galaksi.json")
 
@@ -77,7 +78,21 @@ def travel(credits=True, engines=False, copilot=True):
 
         print(hedef_menusu(destinations))
 
-        choice = int(input("> "))
+        durum = {
+            "konum": planet,
+            "baglantilar": galaksi["baglantilar"],
+            "credits": credits,
+            "engines": engines,
+            "copilot": copilot,
+        }
+        cevap = input("> ").strip()
+        while cevap in KOMUTLAR:
+            islev, _ = KOMUTLAR[cevap]
+            print(islev(durum))
+            print(hedef_menusu(destinations))
+            cevap = input("> ").strip()
+        choice = int(cevap)
+
         try:
             fuel = next(gosterge)
         except StopIteration:

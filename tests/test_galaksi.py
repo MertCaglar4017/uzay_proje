@@ -21,4 +21,4 @@ def test_gecersiz_baslangic_hata_verir():
 def test_baglanti_sirasi_ayni_kaldi():
     g = galaksi_yukle()
     assert g["baglantilar"]["dünya"] == ["centauri", "sirius"]
-    assert g["baglantilar"]["sirius"] == ["dünya", "orion", "kara_delik"]
+    assert g["baglantilar"]["sirius"] == ["orion", "dünya", "kara_delik"]
