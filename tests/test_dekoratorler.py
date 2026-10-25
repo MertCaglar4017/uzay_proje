@@ -1,7 +1,10 @@
 import re
 
-from uzay_oyunu.dekoratorler import say, sure_olc
+import pytest
+
+from uzay_oyunu.dekoratorler import log_cagri, say, sure_olc
 from uzay_oyunu.fib_deneyi import fib_lru_ustte, fib_say_ustte, fib_yalniz_say
+from uzay_oyunu.oyun import galaksi_kur, hedef_menusu
 
 
 @sure_olc
@@ -62,3 +65,57 @@ def test_fib_say_ustte_cagri_sayisi():
 def test_fib_lru_ustte_cagri_sayisi():
     assert fib_lru_ustte(20) == 6765
     assert fib_lru_ustte.__wrapped__.cagri == 21
+
+
+def test_log_cagri_konumsal_ve_adli_argumanlar(capsys):
+    @log_cagri
+    def yolculuk(gezegen, hiz=1):
+        return f"{gezegen} hiz={hiz}"
+
+    assert yolculuk("orion", hiz=3) == "orion hiz=3"
+    satirlar = capsys.readouterr().out.splitlines()
+    assert satirlar == ["-> yolculuk('orion', hiz=3)", "<- yolculuk = 'orion hiz=3'"]
+
+
+def test_log_cagri_sadece_konumsal_argumanlar(capsys):
+    @log_cagri
+    def carp(a, b):
+        return a * b
+
+    assert carp(2, 3) == 6
+    assert capsys.readouterr().out.splitlines() == ["-> carp(2, 3)", "<- carp = 6"]
+
+
+def test_log_cagri_ad_ve_belge_korunur():
+    @log_cagri
+    def selam():
+        """Selam verir."""
+        return "merhaba"
+
+    assert selam.__name__ == "selam"
+    assert selam.__doc__ == "Selam verir."
+
+
+def test_log_cagri_hata_yayilir(capsys):
+    @log_cagri
+    def bol(a, b):
+        return a / b
+
+    with pytest.raises(ZeroDivisionError):
+        bol(1, 0)
+    assert capsys.readouterr().out.splitlines() == ["-> bol(1, 0)"]
+
+
+def test_hedef_menusu_loglanir(capsys):
+    menu = hedef_menusu(["a", "b"])
+    cikti = capsys.readouterr().out
+    assert "-> hedef_menusu(['a', 'b'])" in cikti
+    assert menu == "Nereye gitmek istersin?\n[1] a\n[2] b"
+    assert hedef_menusu.__name__ == "hedef_menusu"
+
+
+def test_galaksi_kur_loglanir(capsys):
+    galaksi_kur(["mars"], {"mars": []}, "mars")
+    cikti = capsys.readouterr().out
+    assert "-> galaksi_kur(['mars'], {'mars': []}, 'mars')" in cikti
+    assert "<- galaksi_kur = " in cikti

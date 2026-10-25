@@ -5,6 +5,7 @@ from pathlib import Path
 
 from uzay_oyunu.akis import yakit_gostergesi
 from uzay_oyunu.araclar import hamle_sayaci
+from uzay_oyunu.dekoratorler import log_cagri
 
 GALAKSI_YOLU = Path(__file__).with_name("galaksi.json")
 
@@ -23,6 +24,7 @@ def envanter_metni(credits: bool, engines: bool, copilot: bool) -> str:
     return "Sende: " + ", ".join(items)
 
 
+@log_cagri
 def hedef_menusu(hedefler: list[str]) -> str:
     """Hedefleri numaralı menü metni olarak döndürür."""
     satirlar = ["Nereye gitmek istersin?"]
@@ -31,6 +33,7 @@ def hedef_menusu(hedefler: list[str]) -> str:
     return "\n".join(satirlar)
 
 
+@log_cagri
 def galaksi_kur(
     gezegenler: list[str],
     baglantilar: dict[str, list[str]],
