@@ -72,6 +72,33 @@ def sinirla(alt: float, ust: float) -> Callable:
     return dekorator
 
 
+def hafiza(maxsize: int | None = None) -> Callable:
+    """Sonuçları closure içindeki bir sözlükte saklayan önbellek dekoratörü.
+
+    lru_cache kullanmaz. maxsize verilirse önbellek dolunca en eski girdi silinir.
+    """
+
+    def dekorator(fonksiyon: Callable) -> Callable:
+        onbellek: dict = {}
+
+        @wraps(fonksiyon)
+        def sarmalayici(*args, **kwargs):
+            anahtar = (args, tuple(sorted(kwargs.items())))
+            if anahtar in onbellek:
+                return onbellek[anahtar]
+            sonuc = fonksiyon(*args, **kwargs)
+            onbellek[anahtar] = sonuc
+            if maxsize is not None and len(onbellek) > maxsize:
+                en_eski = next(iter(onbellek))
+                del onbellek[en_eski]
+            return sonuc
+
+        sarmalayici.onbellek = onbellek
+        return sarmalayici
+
+    return dekorator
+
+
 if __name__ == "__main__":
     from uzay_oyunu.akis import rota_sayaci_onbelleksiz
     from uzay_oyunu.oyun import galaksi_yukle
