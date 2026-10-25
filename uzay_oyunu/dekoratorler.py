@@ -1,5 +1,6 @@
 """Dekoratörler: süre ölçme, çağrı sayma, loglama ve aralık sınırlama."""
 
+import inspect
 import time
 from collections.abc import Callable
 from functools import wraps
@@ -44,6 +45,31 @@ def log_cagri(fonksiyon: Callable) -> Callable:
         return sonuc
 
     return sarmalayici
+
+
+def sinirla(alt: float, ust: float) -> Callable:
+    """İlk argümanı [alt, ust] aralığında değilse ValueError fırlatan dekoratör."""
+
+    def dekorator(fonksiyon: Callable) -> Callable:
+        ilk_ad = list(inspect.signature(fonksiyon).parameters)[0]
+
+        @wraps(fonksiyon)
+        def sarmalayici(*args, **kwargs):
+            if args:
+                deger = args[0]
+            elif ilk_ad in kwargs:
+                deger = kwargs[ilk_ad]
+            else:
+                return fonksiyon(*args, **kwargs)
+            if not alt <= deger <= ust:
+                raise ValueError(
+                    f"{fonksiyon.__name__}: {deger} değeri {alt}-{ust} aralığında değil"
+                )
+            return fonksiyon(*args, **kwargs)
+
+        return sarmalayici
+
+    return dekorator
 
 
 if __name__ == "__main__":

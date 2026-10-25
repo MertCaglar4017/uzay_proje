@@ -3,6 +3,8 @@
 import time
 from collections.abc import Callable
 
+from uzay_oyunu.dekoratorler import sinirla
+
 
 def yakit_ekle(miktar: int, depo: list[int] | None = None) -> list[int]:
     """Miktarı depoya ekler; depo verilmezse her çağrıda yeni bir liste açar."""
@@ -44,6 +46,12 @@ def sure_olc(fonksiyon: Callable) -> Callable:
         return sonuc
 
     return sarmalayici
+
+
+@sinirla(0, 100)
+def yakit_harca(miktar: int) -> int:
+    """Depodaki 100 birimlik yakıttan miktar kadarını harcar, kalanı döndürür."""
+    return 100 - miktar
 
 
 if __name__ == "__main__":

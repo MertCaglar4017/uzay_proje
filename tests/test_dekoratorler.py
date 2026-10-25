@@ -2,7 +2,8 @@ import re
 
 import pytest
 
-from uzay_oyunu.dekoratorler import log_cagri, say, sure_olc
+from uzay_oyunu.araclar import yakit_harca
+from uzay_oyunu.dekoratorler import log_cagri, say, sinirla, sure_olc
 from uzay_oyunu.fib_deneyi import fib_lru_ustte, fib_say_ustte, fib_yalniz_say
 from uzay_oyunu.oyun import galaksi_kur, hedef_menusu
 
@@ -119,3 +120,45 @@ def test_galaksi_kur_loglanir(capsys):
     cikti = capsys.readouterr().out
     assert "-> galaksi_kur(['mars'], {'mars': []}, 'mars')" in cikti
     assert "<- galaksi_kur = " in cikti
+
+
+def test_sinirla_aralik_icinde_calisir():
+    assert yakit_harca(30) == 70
+
+
+def test_sinirla_sinir_degerleri():
+    assert yakit_harca(0) == 100
+    assert yakit_harca(100) == 0
+
+
+def test_sinirla_aralik_disi_deger_hata_verir():
+    mesaj = "yakit_harca: 150 değeri 0-100 aralığında değil"
+    with pytest.raises(ValueError, match=mesaj):
+        yakit_harca(150)
+    with pytest.raises(ValueError, match="yakit_harca: -1 değeri 0-100 aralığında değil"):
+        yakit_harca(-1)
+    with pytest.raises(ValueError):
+        yakit_harca(101)
+
+
+def test_sinirla_adli_arguman():
+    assert yakit_harca(miktar=30) == 70
+    with pytest.raises(ValueError):
+        yakit_harca(miktar=150)
+
+
+def test_sinirla_farkli_aralik():
+    @sinirla(1, 5)
+    def kare(n):
+        return n * n
+
+    assert kare(5) == 25
+    with pytest.raises(ValueError, match="kare: 6 değeri 1-5 aralığında değil"):
+        kare(6)
+
+
+def test_sinirla_ad_ve_belge_korunur():
+    assert yakit_harca.__name__ == "yakit_harca"
+    assert yakit_harca.__doc__ == (
+        "Depodaki 100 birimlik yakıttan miktar kadarını harcar, kalanı döndürür."
+    )
